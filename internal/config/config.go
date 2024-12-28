@@ -8,11 +8,26 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type WorldDefaults struct {
+	LevelName    string `yaml:"level_name"`
+	Seed         string `yaml:"seed"`
+	Gamemode     string `yaml:"gamemode"`
+	Difficulty   string `yaml:"difficulty"`
+	AllowList    bool   `yaml:"allow_list"`
+	ServerPort   int    `yaml:"server_port"`
+	ViewDistance int    `yaml:"view_distance"`
+	TickDistance int    `yaml:"tick_distance"`
+	MaxPlayers   int    `yaml:"max_players"`
+}
+
 type Config struct {
-	ServerDirectory  string `yaml:"server_directory"`
-	BackupDirectory string `yaml:"backup_directory"`
-	BackupInterval  int    `yaml:"backup_interval"`
-	BackupsToKeep   int    `yaml:"backups_to_keep"`
+	ServerDirectory  string       `yaml:"server_directory"`
+	WorldsDirectory string       `yaml:"worlds_directory"`
+	BackupDirectory string       `yaml:"backup_directory"`
+	BackupInterval  int          `yaml:"backup_interval"`
+	BackupsToKeep   int          `yaml:"backups_to_keep"`
+	ServerName      string       `yaml:"server_name"`
+	WorldDefaults   WorldDefaults `yaml:"world_defaults"`
 }
 
 // LoadConfig loads configuration from the specified file

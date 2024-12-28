@@ -3,6 +3,7 @@ package main
 import (
 	"bsm/internal/config"
 	"bsm/internal/server"
+	"bsm/internal/worlds"
 	"flag"
 	"fmt"
 	"os"
@@ -21,6 +22,8 @@ func main() {
 		handleConfig()
 	case "server":
 		handleServer()
+	case "worlds":
+		handleWorlds()
 	case "help":
 		printUsage()
 	default:
@@ -99,11 +102,81 @@ func handleServer() {
 	}
 }
 
+func handleWorlds() {
+	worldsCmd := flag.NewFlagSet("worlds", flag.ExitOnError)
+	worldsCmd.Parse(os.Args[2:])
+
+	if worldsCmd.NArg() < 1 {
+		fmt.Println("Usage: bsm worlds [list|switch|create]")
+		os.Exit(1)
+	}
+
+	// Load config
+	cfg, err := config.LoadConfig("config.yaml")
+	if err != nil {
+		fmt.Printf("Error loading config: %v\n", err)
+		os.Exit(1)
+	}
+
+	wm := worlds.NewWorldManager(cfg.ServerDirectory, cfg.WorldsDirectory, cfg.WorldDefaults)
+	subcommand := worldsCmd.Arg(0)
+
+	switch subcommand {
+	case "list":
+		worlds, err := wm.ListWorlds()
+		if err != nil {
+			fmt.Printf("Error listing worlds: %v\n", err)
+			os.Exit(1)
+		}
+
+		activeWorld, err := wm.GetActiveWorld()
+		if err != nil {
+			fmt.Printf("Error getting active world: %v\n", err)
+			os.Exit(1)
+		}
+
+		fmt.Println("Available worlds:")
+		for _, world := range worlds {
+			if world.Name == activeWorld {
+				fmt.Printf("* %s (active)\n", world.Name)
+			} else {
+				fmt.Printf("  %s\n", world.Name)
+			}
+		}
+
+	case "switch":
+		if worldsCmd.NArg() < 2 {
+			fmt.Println("Usage: bsm worlds switch [world_name]")
+			os.Exit(1)
+		}
+
+		worldName := worldsCmd.Arg(1)
+		if err := wm.SwitchWorld(worldName); err != nil {
+			fmt.Printf("Error switching world: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Switched to world: %s\n", worldName)
+
+	case "create":
+		if err := wm.CreateWorld(); err != nil {
+			fmt.Printf("Error creating world: %v\n", err)
+			os.Exit(1)
+		}
+
+	default:
+		fmt.Printf("Unknown worlds subcommand: %s\n", subcommand)
+		os.Exit(1)
+	}
+}
+
 func printUsage() {
 	fmt.Println(`Usage: bsm [command]
 
 Commands:
   config                   Generate config file
   server setup {version}   Setup new server
-  server update {version}  Update server using download URL`)
+  server update {version}  Update server using download URL
+  worlds list             List all worlds
+  worlds switch {name}    Switch to world {name}
+  worlds create {name}    Create a new world`)
 }
