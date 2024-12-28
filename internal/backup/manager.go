@@ -118,6 +118,13 @@ func (bm *BackupManager) CreateBackup(worldName string) error {
 
 // RestoreBackup restores a world from a backup
 func (bm *BackupManager) RestoreBackup(worldName string) error {
+	// First check if we have write permissions to the worlds directory
+	testPath := filepath.Join(bm.ServerDir, "worlds", ".test_write")
+	if err := os.WriteFile(testPath, []byte("test"), 0644); err != nil {
+		return fmt.Errorf("insufficient permissions to modify worlds directory. Please run with appropriate permissions")
+	}
+	os.Remove(testPath)
+
 	worldBackupDir := filepath.Join(bm.BackupDir, worldName)
 	backups, _, err := bm.getWorldBackups(worldBackupDir)
 	if err != nil {
@@ -158,24 +165,27 @@ func (bm *BackupManager) RestoreBackup(worldName string) error {
 	// Confirm restoration
 	fmt.Printf("\nWARNING: This will replace the current world '%s' with the backup from %s\n", 
 		worldName, selectedBackup.CreatedAt.Format("2006-01-02 15:04:05"))
-	fmt.Print("Are you sure you want to continue? (yes/no): ")
+	fmt.Print("Are you sure you want to continue? (y/n): ")
 	
 	var confirm string
 	fmt.Scanln(&confirm)
-	if strings.ToLower(confirm) != "yes" {
+	confirm = strings.ToLower(confirm)
+	if confirm != "yes" && confirm != "y" {
 		return fmt.Errorf("backup restoration cancelled")
 	}
 
 	// Perform restoration
 	worldPath := filepath.Join(bm.ServerDir, "worlds", worldName)
-	
-	// Remove existing world
-	if err := os.RemoveAll(worldPath); err != nil {
-		return fmt.Errorf("error removing existing world: %v", err)
+
+	// Remove existing world if it exists
+	if _, err := os.Stat(worldPath); err == nil {
+		if err := os.RemoveAll(worldPath); err != nil {
+			return fmt.Errorf("error removing existing world: %v", err)
+		}
 	}
 
 	// Extract backup
-	if err := utils.UnzipFile(selectedBackup.Path, filepath.Join(bm.ServerDir, "worlds")); err != nil {
+	if err := utils.UnzipFile(selectedBackup.Path, filepath.Join(bm.ServerDir, "worlds"), worldName); err != nil {
 		return fmt.Errorf("error restoring backup: %v", err)
 	}
 

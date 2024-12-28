@@ -121,15 +121,23 @@ func ZipDirectory(src, dst string) error {
 }
 
 // UnzipFile extracts a zip file to the specified destination
-func UnzipFile(src, dst string) error {
+func UnzipFile(src, dst string, worldName string) error {
 	reader, err := zip.OpenReader(src)
 	if err != nil {
 		return err
 	}
 	defer reader.Close()
 
+	// Ensure the world directory exists
+	worldDir := filepath.Join(dst, worldName)
+	if err := os.MkdirAll(worldDir, 0755); err != nil {
+		return err
+	}
+
 	for _, file := range reader.File {
-		path := filepath.Join(dst, file.Name)
+		// Get just the base path without the world name prefix
+		basePath := filepath.Base(file.Name)
+		path := filepath.Join(worldDir, basePath)
 
 		if file.FileInfo().IsDir() {
 			os.MkdirAll(path, file.Mode())
