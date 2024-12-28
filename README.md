@@ -7,8 +7,8 @@ This tool is meant to be a backup manager and updater for your bedrock server. I
 ## Features
 
 -   Setup server (DONE)
+-   List, create and switch between active worlds (DONE)
 -   Update server (NOT DONE)
--   Switch between active worlds (NOT DONE)
 -   Backup & Restore worlds (NOT DONE)
 
 # CLI INTERFACE

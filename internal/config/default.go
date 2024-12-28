@@ -16,7 +16,7 @@ func GetDefaultConfig() *Config {
 			Difficulty:   "normal",
 			AllowList:    true,
 			ServerPort:   19132,
-			ViewDistance: 32,
+			ViewDistance: 16,
 			TickDistance: 4,
 			MaxPlayers:   10,
 		},
@@ -29,15 +29,18 @@ func DefaultConfigYAML() string {
 # Bedrock Server Manager
 # Configuration file
 
+# Server name used for server-name property
+server_name: "Bedrock Server"
+
 # Server directory. This is the directory where the server will be installed.
-server_directory: ./bedrock_server
+server_directory: ./server
 
 # Directory where world configurations are stored
 worlds_directory: ./worlds
 
 # BACKUP SETTINGS
 # Directory where backups will be stored
-backup_directory: ./bedrock_server_backups
+backup_directory: ./backups
 
 # Backup interval in minutes (default: 1440 = 24 hours)
 backup_interval: 1440
@@ -45,19 +48,17 @@ backup_interval: 1440
 # Number of backups to keep (set to 0 to keep all backups)
 backups_to_keep: 7
 
-# Server name used for server-name property
-server_name: "Bedrock Server"
 
-# Default world settings
+# DEFAULT WORLD SETTINGS
+
 world_defaults:
-  # World settings
   level_name: world
   seed: ""
   gamemode: survival
   difficulty: normal
   allow_list: true
   server_port: 19132
-  view_distance: 32
+  view_distance: 16
   tick_distance: 4
   max_players: 10
 `

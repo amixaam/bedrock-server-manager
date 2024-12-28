@@ -1,7 +1,6 @@
 package worlds
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -32,38 +31,6 @@ func NewWorldManager(serverDir, worldsDir string, defaults config.WorldDefaults,
 		Defaults:   defaults,
 		ServerName: serverName,
 	}
-}
-
-// promptString asks for user input with a default value
-func promptString(prompt string, defaultValue string) string {
-	fmt.Printf("%s [%s]: ", prompt, defaultValue)
-	reader := bufio.NewReader(os.Stdin)
-	input, _ := reader.ReadString('\n')
-	input = strings.TrimSpace(input)
-	if input == "" {
-		return defaultValue
-	}
-	return input
-}
-
-// promptInt asks for numeric user input with a default value
-func promptInt(prompt string, defaultValue int) int {
-	input := promptString(prompt, strconv.Itoa(defaultValue))
-	value, err := strconv.Atoi(input)
-	if err != nil {
-		return defaultValue
-	}
-	return value
-}
-
-// promptBool asks for boolean user input with a default value
-func promptBool(prompt string, defaultValue bool) bool {
-	defaultStr := "no"
-	if defaultValue {
-		defaultStr = "yes"
-	}
-	input := strings.ToLower(promptString(prompt, defaultStr))
-	return input == "yes" || input == "y" || (input == "" && defaultValue)
 }
 
 // ListWorlds returns a list of available worlds
@@ -141,15 +108,15 @@ func (wm *WorldManager) SwitchWorld(worldName string) error {
 // CreateWorld creates a new world with custom properties
 func (wm *WorldManager) CreateWorld() error {
 	// Get world settings from user
-	levelName := promptString("Enter world name", wm.Defaults.LevelName)
-	seed := promptString("Enter seed (leave empty for random)", wm.Defaults.Seed)
-	gamemode := promptString("Enter gamemode (survival/creative/adventure)", wm.Defaults.Gamemode)
-	difficulty := promptString("Enter difficulty (peaceful/easy/normal/hard)", wm.Defaults.Difficulty)
-	allowList := promptBool("Enable allow list? (yes/no)", wm.Defaults.AllowList)
-	serverPort := promptInt("Enter server port", wm.Defaults.ServerPort)
-	viewDistance := promptInt("Enter view distance", wm.Defaults.ViewDistance)
-	tickDistance := promptInt("Enter tick distance", wm.Defaults.TickDistance)
-	maxPlayers := promptInt("Enter max players", wm.Defaults.MaxPlayers)
+	levelName := utils.PromptString("Enter world name", wm.Defaults.LevelName)
+	seed := utils.PromptString("Enter seed (leave empty for random)", wm.Defaults.Seed)
+	gamemode := utils.PromptString("Enter gamemode (survival/creative/adventure)", wm.Defaults.Gamemode)
+	difficulty := utils.PromptString("Enter difficulty (peaceful/easy/normal/hard)", wm.Defaults.Difficulty)
+	allowList := utils.PromptBool("Enable allow list? (yes/no)", wm.Defaults.AllowList)
+	serverPort := utils.PromptInt("Enter server port", wm.Defaults.ServerPort)
+	viewDistance := utils.PromptInt("Enter view distance", wm.Defaults.ViewDistance)
+	tickDistance := utils.PromptInt("Enter tick distance", wm.Defaults.TickDistance)
+	maxPlayers := utils.PromptInt("Enter max players", wm.Defaults.MaxPlayers)
 
 	// Create world directory
 	worldDir := filepath.Join(wm.WorldsDir, levelName)
