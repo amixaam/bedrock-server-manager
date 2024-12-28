@@ -44,6 +44,6 @@ This tool is meant to be a backup manager and updater for your bedrock server. I
 
 | Command                   | Description           | Status       |
 | ------------------------- | --------------------- | ------------ |
-| bsm backup list           | List all backups      | not finished |
-| bsm backup create {name}  | Create backup {name}  | not finished |
+| bsm backup list           | List all backups      | finished     |
+| bsm backup create {name}  | Create backup {name}  | finished     |
 | bsm backup restore {name} | Restore backup {name} | not finished |
