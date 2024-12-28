@@ -15,34 +15,35 @@ This tool is meant to be a backup manager and updater for your bedrock server. I
 
 ## General
 
-| Command    | Description                                |
-| ---------- | ------------------------------------------ |
-| bsm help   | Show help                                  |
-| bsm config | Create bsm config file                     |
-| bsm status | Show current world, backups, version, etc. |
-| bsm health | Check server & backup storage space        |
+| Command    | Description                                | Status       |
+| ---------- | ------------------------------------------ | ------------ |
+| bsm help   | Show help                                  | finished     |
+| bsm config | Create bsm config file                     | finished     |
+| bsm status | Show current world, backups, version, etc. | not finished |
+| bsm health | Check server & backup storage space        | not finished |
 
 ## Server
 
-| Command                     | Description           |
-| --------------------------- | --------------------- |
-| bsm server setup {version}  | Setup server          |
-| bsm server update {version} | Update server version |
+| Command                     | Description           | Status       |
+| --------------------------- | --------------------- | ------------ |
+| bsm server setup {version}  | Setup server          | finished     |
+| bsm server update {version} | Update server version | not finished |
 
 ## Worlds
 
-| Command                  | Description            |
-| ------------------------ | ---------------------- |
-| bsm worlds list          | List all worlds        |
-| bsm worlds switch {name} | Switch to world {name} |
-| bsm worlds delete {name} | Delete world {name}    |
-| bsm worlds export {name} | Export world {name}    |
-| bsm worlds import {file} | Import world {file}    |
+| Command                  | Description            | Status       |
+| ------------------------ | ---------------------- | ------------ |
+| bsm worlds list          | List all worlds        | finished     |
+| bsm worlds switch {name} | Switch to world {name} | finished     |
+| bsm worlds create {name} | Create world {name}    | finished     |
+| bsm worlds delete {name} | Delete world {name}    | not finished |
+| bsm worlds export {name} | Export world {name}    | not finished |
+| bsm worlds import {file} | Import world {file}    | not finished |
 
 ## Backups
 
-| Command                   | Description           |
-| ------------------------- | --------------------- |
-| bsm backup list           | List all backups      |
-| bsm backup create {name}  | Create backup {name}  |
-| bsm backup restore {name} | Restore backup {name} |
+| Command                   | Description           | Status       |
+| ------------------------- | --------------------- | ------------ |
+| bsm backup list           | List all backups      | not finished |
+| bsm backup create {name}  | Create backup {name}  | not finished |
+| bsm backup restore {name} | Restore backup {name} | not finished |
