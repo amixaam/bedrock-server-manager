@@ -33,12 +33,9 @@ type Config struct {
 // LoadConfig loads configuration from the specified file
 // Returns default config if file doesn't exist
 func LoadConfig(path string) (*Config, error) {
-	// Start with default config
-	config := GetDefaultConfig()
-
 	// Check if file exists
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return config, nil
+		return GetDefaultConfig(), nil
 	}
 
 	// Read the config file
@@ -47,30 +44,15 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, fmt.Errorf("error reading config file: %v", err)
 	}
 
-	// Create a map to store the YAML values
-	var configMap map[string]interface{}
-	if err := yaml.Unmarshal(data, &configMap); err != nil {
+	var config Config
+	if err := yaml.Unmarshal(data, &config); err != nil {
 		return nil, fmt.Errorf("error parsing config file: %v", err)
 	}
 
-	// Only override values that are explicitly set in the YAML
-	if serverDir, ok := configMap["server_directory"].(string); ok && serverDir != "" {
-		config.ServerDirectory = serverDir
-	}
-	if backupDir, ok := configMap["backup_directory"].(string); ok && backupDir != "" {
-		config.BackupDirectory = backupDir
-	}
-	if interval, ok := configMap["backup_interval"].(int); ok {
-		config.BackupInterval = interval
-	}
-	if keep, ok := configMap["backups_to_keep"].(int); ok {
-		config.BackupsToKeep = keep
-	}
-
-	return config, nil
+	return &config, nil
 }
 
-// SaveConfig saves the configuration to the specified file
+	// SaveConfig saves the configuration to the specified file
 func (c *Config) SaveConfig(path string) error {
 	// Create directory if it doesn't exist
 	dir := filepath.Dir(path)
@@ -94,6 +76,9 @@ func (c *Config) SaveConfig(path string) error {
 func (c *Config) ValidateConfig() error {
 	if c.ServerDirectory == "" {
 		return fmt.Errorf("server_directory cannot be empty")
+	}
+	if c.WorldsDirectory == "" {
+		return fmt.Errorf("worlds_directory cannot be empty")
 	}
 	if c.BackupDirectory == "" {
 		return fmt.Errorf("backup_directory cannot be empty")

@@ -42,11 +42,8 @@ func handleConfig() {
 		return
 	}
 
-	// Get default config
-	defaultConfig := config.GetDefaultConfig()
-
-	// Save config file
-	if err := defaultConfig.SaveConfig(configPath); err != nil {
+	// Write the default config template
+	if err := os.WriteFile(configPath, []byte(config.DefaultConfigYAML()), 0644); err != nil {
 		fmt.Printf("Error creating config file: %v\n", err)
 		os.Exit(1)
 	}
@@ -118,7 +115,7 @@ func handleWorlds() {
 		os.Exit(1)
 	}
 
-	wm := worlds.NewWorldManager(cfg.ServerDirectory, cfg.WorldsDirectory, cfg.WorldDefaults)
+	wm := worlds.NewWorldManager(cfg.ServerDirectory, cfg.WorldsDirectory, cfg.WorldDefaults, cfg.ServerName)
 	subcommand := worldsCmd.Arg(0)
 
 	switch subcommand {

@@ -22,13 +22,15 @@ type WorldManager struct {
 	WorldsDir     string
 	ActiveWorld   string
 	Defaults      config.WorldDefaults
+	ServerName    string
 }
 
-func NewWorldManager(serverDir, worldsDir string, defaults config.WorldDefaults) *WorldManager {
+func NewWorldManager(serverDir, worldsDir string, defaults config.WorldDefaults, serverName string) *WorldManager {
 	return &WorldManager{
-		ServerDir: serverDir,
-		WorldsDir: worldsDir,
-		Defaults:  defaults,
+		ServerDir:  serverDir,
+		WorldsDir:  worldsDir,
+		Defaults:   defaults,
+		ServerName: serverName,
 	}
 }
 
@@ -157,6 +159,7 @@ func (wm *WorldManager) CreateWorld() error {
 
 	// Create server.properties
 	props := map[string]string{
+		"server-name":    fmt.Sprintf("%s - %s", wm.ServerName, levelName),
 		"level-name":     levelName,
 		"server-port":    strconv.Itoa(serverPort),
 		"gamemode":       gamemode,
@@ -195,21 +198,27 @@ func (wm *WorldManager) createPropertiesFile(path string, props map[string]strin
 	}
 
 	lines := strings.Split(string(data), "\n")
-	for i, line := range lines {
+	newLines := make([]string, 0, len(lines))
+
+	for _, line := range lines {
 		if line == "" || strings.HasPrefix(line, "#") {
+			newLines = append(newLines, line)
 			continue
 		}
 
 		parts := strings.SplitN(line, "=", 2)
 		if len(parts) != 2 {
+			newLines = append(newLines, line)
 			continue
 		}
 
 		key := strings.TrimSpace(parts[0])
 		if newValue, exists := props[key]; exists {
-			lines[i] = key + "=" + newValue
+			newLines = append(newLines, key + "=" + newValue)
+		} else {
+			newLines = append(newLines, line)
 		}
 	}
 
-	return os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0644)
+	return os.WriteFile(path, []byte(strings.Join(newLines, "\n")), 0644)
 }
