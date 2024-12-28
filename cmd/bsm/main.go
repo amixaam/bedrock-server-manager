@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bsm/internal/backup"
 	"bsm/internal/config"
 	"bsm/internal/server"
 	"bsm/internal/worlds"
@@ -24,6 +25,8 @@ func main() {
 		handleServer()
 	case "worlds":
 		handleWorlds()
+	case "backup":
+		handleBackup()
 	case "help":
 		printUsage()
 	default:
@@ -166,6 +169,78 @@ func handleWorlds() {
 	}
 }
 
+func handleBackup() {
+	backupCmd := flag.NewFlagSet("backup", flag.ExitOnError)
+	backupCmd.Parse(os.Args[2:])
+
+	if backupCmd.NArg() < 1 {
+		fmt.Println("Usage: bsm backup [list|create|restore]")
+		os.Exit(1)
+	}
+
+	// Load config
+	cfg, err := config.LoadConfig("config.yaml")
+	if err != nil {
+		fmt.Printf("Error loading config: %v\n", err)
+		os.Exit(1)
+	}
+
+	bm := backup.NewBackupManager(cfg)
+	subcommand := backupCmd.Arg(0)
+
+	switch subcommand {
+	case "list":
+		backups, err := bm.ListBackups()
+		if err != nil {
+			fmt.Printf("Error listing backups: %v\n", err)
+			os.Exit(1)
+		}
+
+		if len(backups) == 0 {
+			fmt.Println("No backups found")
+			return
+		}
+
+		for _, wb := range backups {
+			fmt.Printf("\nWorld: %s\n", wb.WorldName)
+			fmt.Printf("Total backups: %d (%.2f MB)\n", wb.BackupCount, float64(wb.TotalSize)/(1024*1024))
+			if len(wb.Backups) > 0 {
+				fmt.Println("Recent backups:")
+				for _, b := range wb.Backups {
+					fmt.Printf("  %s (%.2f MB)\n", 
+						b.CreatedAt.Format("2006-01-02 15:04:05"),
+						float64(b.Size)/(1024*1024))
+				}
+			}
+		}
+
+	case "create":
+		if backupCmd.NArg() < 2 {
+			fmt.Println("Usage: bsm backup create [world_name]")
+			os.Exit(1)
+		}
+		worldName := backupCmd.Arg(1)
+		if err := bm.CreateBackup(worldName); err != nil {
+			fmt.Printf("Error creating backup: %v\n", err)
+			os.Exit(1)
+		}
+
+	case "restore":
+		if backupCmd.NArg() < 2 {
+			fmt.Println("Usage: bsm backup restore [world_name]")
+			os.Exit(1)
+		}
+		worldName := backupCmd.Arg(1)
+		if err := bm.RestoreBackup(worldName); err != nil {
+			fmt.Printf("Error restoring backup: %v\n", err)
+			os.Exit(1)
+		}
+	default:
+		fmt.Printf("Unknown backup subcommand: %s\n", subcommand)
+		os.Exit(1)
+	}
+}
+
 func printUsage() {
 	fmt.Println(`Usage: bsm [command]
 
@@ -175,5 +250,9 @@ Commands:
   server update {version}  Update server using download URL
   worlds list             List all worlds
   worlds switch {name}    Switch to world {name}
-  worlds create {name}    Create a new world`)
+  worlds create {name}    Create a new world
+  backup list             List all backups
+  backup create {name}    Create backup {name}
+  backup restore {name}   Restore backup {name}
+  `)
 }
