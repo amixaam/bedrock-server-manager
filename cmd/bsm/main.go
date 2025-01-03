@@ -23,7 +23,7 @@ func main() {
 		handleConfig()
 	case "server":
 		handleServer()
-	case "worlds":
+	case "world":
 		handleWorlds()
 	case "backup":
 		handleBackup()
@@ -59,11 +59,19 @@ func handleServer() {
 	serverCmd.Parse(os.Args[2:])
 
 	if serverCmd.NArg() < 1 {
-		fmt.Println("Usage: bsm server [setup|update]")
+		fmt.Println("Usage: bsm server [setup|start|stop|status|update]")
+		os.Exit(1)
+	}
+
+	// Load config
+	cfg, err := config.LoadConfig("config.yaml")
+	if err != nil {
+		fmt.Printf("Error loading config: %v\n", err)
 		os.Exit(1)
 	}
 
 	subcommand := serverCmd.Arg(0)
+	sm := server.NewServerManager(cfg.ServerDirectory)
 
 	switch subcommand {
 	case "setup":
@@ -76,18 +84,36 @@ func handleServer() {
 		version := serverCmd.Arg(1)
 		downloadURL := fmt.Sprintf("https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-%s.zip", version)
 		
-		// Load config
-		cfg, err := config.LoadConfig("config.yaml")
-		if err != nil {
-			fmt.Printf("Error loading config: %v\n", err)
-			os.Exit(1)
-		}
-
 		fmt.Printf("Setting up server version %s...\n", version)
 		if err := server.SetupServer(downloadURL, cfg); err != nil {
 			fmt.Printf("Error setting up server: %v\n", err)
 			os.Exit(1)
 		}
+
+	case "start":
+		fmt.Println("Starting Bedrock server...")
+		if err := sm.Start(); err != nil {
+			fmt.Printf("Error starting server: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("Server started successfully")
+
+	case "stop":
+		fmt.Println("Stopping Bedrock server...")
+		if err := sm.Stop(); err != nil {
+			fmt.Printf("Error stopping server: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("Server stopped successfully")
+
+	case "status":
+		status, err := sm.Status()
+		if err != nil {
+			fmt.Printf("Error getting server status: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Server status: %s\n", status)
+
 	case "update":
 		if serverCmd.NArg() < 2 {
 			fmt.Println("Usage: bsm server update [download_url]")
@@ -96,6 +122,7 @@ func handleServer() {
 		downloadURL := serverCmd.Arg(1)
 		fmt.Printf("Updating server from URL: %s\n", downloadURL)
 		// TODO: Implement server update
+
 	default:
 		fmt.Printf("Unknown server subcommand: %s\n", subcommand)
 		os.Exit(1)
@@ -103,11 +130,11 @@ func handleServer() {
 }
 
 func handleWorlds() {
-	worldsCmd := flag.NewFlagSet("worlds", flag.ExitOnError)
+	worldsCmd := flag.NewFlagSet("world", flag.ExitOnError)
 	worldsCmd.Parse(os.Args[2:])
 
 	if worldsCmd.NArg() < 1 {
-		fmt.Println("Usage: bsm worlds [list|switch|create]")
+		fmt.Println("Usage: bsm world [list|switch|create]")
 		os.Exit(1)
 	}
 
@@ -242,17 +269,21 @@ func handleBackup() {
 }
 
 func printUsage() {
-	fmt.Println(`Usage: bsm [command]
+	fmt.Println(`
+Usage: bsm [command]
 
 Commands:
   config                   Generate config file
   server setup {version}   Setup new server
+  server start            Start the Bedrock server
+  server stop             Stop the Bedrock server
+  server status           Check server status
   server update {version}  Update server using download URL
-  worlds list             List all worlds
-  worlds switch {name}    Switch to world {name}
-  worlds create {name}    Create a new world
-  backup list             List all backups
-  backup create {name}    Create backup {name}
-  backup restore {name}   Restore backup {name}
+  world list               List all worlds
+  world switch {name}      Switch to world {name}
+  world create {name}      Create a new world
+  backup list              List all backups
+  backup create {name}     Create backup {name}
+  backup restore {name}    Restore backup {name}
   `)
 }

@@ -30,6 +30,7 @@ func DefaultConfigYAML() string {
 # Configuration file
 
 # Server name used for server-name property
+# Will be shown in-game in addition to the current selected world (example, "Bedrock Server - default_world")
 server_name: "Bedrock Server"
 
 # Server directory. This is the directory where the server will be installed.

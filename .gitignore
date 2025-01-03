@@ -1,3 +1,4 @@
 config.yaml
 server
 worlds
+.DS_Store
